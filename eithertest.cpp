@@ -22,14 +22,13 @@ void test_intfloat() {
     Either<int, float> ef(5);
     Either<int, float> es(5.0f);
 
-    CHECK(ef.match<bool>(
-        [](int i)   { return true; },
-        [](float f) { return false; }));
+    CHECK(isLeft(ef));
+    CHECK(isRight(es));
 
     auto double_ = [](const Either<int, float>& ef) -> double {
         return ef.match<double>(
-            [](const int& i)   { return i * 2; },
-            [](const float& f) { return f * 2; }
+            [](int i)   { return i * 2; },
+            [](float f) { return f * 2; }
         );
     };
 
@@ -162,6 +161,13 @@ void test_move2() {
         [](const std::unique_ptr<float>& f) { return 0xdeadbeef; });
 
     CHECK_EQUAL(value, 22);
+}
+
+void test_nonconst_function_accessors() {
+    Either<int, float> e(5);
+    left(e)++;
+
+    CHECK_EQUAL(6, left(e));
 }
 
 int main() {

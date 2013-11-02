@@ -150,6 +150,10 @@ struct Either {
         return !(*this == rhs);
     }
 
+    bool isLeft() const {
+        return State::L == state;
+    }
+
 private:
     const Left& left()   const { return *reinterpret_cast<const Left*>(&storage); }
     const Right& right() const { return *reinterpret_cast<const Right*>(&storage); }
@@ -167,6 +171,23 @@ private:
 };
 
 template <typename L, typename R>
+bool isLeft(const Either<L, R>& e) {
+    return e.isLeft();
+}
+
+template <typename L, typename R>
+bool isRight(const Either<L, R>& e) {
+    return !isLeft(e);
+}
+
+template <typename L, typename R>
+L& left(Either<L, R>& e) {
+    return e.template match<L&>(
+        [](L& l) -> L& { return l; },
+        [](R& r) -> L& { printf("Unexpected\n"); abort(); return *(L*)0; });
+}
+
+template <typename L, typename R>
 const L& left(const Either<L, R>& e) {
     return e.template match<const L&>(
         [](const L& l) -> const L& { return l; },
@@ -174,7 +195,15 @@ const L& left(const Either<L, R>& e) {
 }
 
 template <typename L, typename R>
-const R& right(Either<L, R>& e) {
+R& right(Either<L, R>& e) {
+    return e.template match<R&>(
+        [](L& l) -> R& { printf("Unexpected\n"); abort(); return *(R*)0; },
+        [](R& r) -> R& { return r; });
+}
+
+
+template <typename L, typename R>
+const R& right(const Either<L, R>& e) {
     return e.template match<const R&>(
         [](const L& l) -> const R& { printf("Unexpected\n"); abort(); return *(R*)0; },
         [](const R& r) -> const R& { return r; });
