@@ -113,7 +113,21 @@ void test_ctors() {
     });
 }
 
-void test_move() {
+void test_move1() {
+    typedef Either<std::unique_ptr<int>, std::unique_ptr<float> > E;
+
+    E e(std::unique_ptr<int>(new int(22)));
+    E f = std::move(e);
+
+    const auto& ep = left(e);
+    const auto& fp = left(f);
+
+    CHECK_EQUAL(nullptr, ep);
+    CHECK_NOT_EQUAL(nullptr, fp);
+    CHECK_EQUAL(22, *fp);
+}
+
+void test_move2() {
     typedef Either<std::unique_ptr<int>, std::unique_ptr<float> > E;
 
     E e(std::unique_ptr<int>(new int(22)));
@@ -125,12 +139,21 @@ void test_move() {
     h = std::move(f);
 
     CHECK_EQUAL(e, f);
+
+    h = std::move(h);
+
+    int value = h.match<int>(
+        [](const std::unique_ptr<int>& i) { return *i; },
+        [](const std::unique_ptr<float>& f) { return 0xdeadbeef; });
+
+    CHECK_EQUAL(value, 22);
 }
 
 int main() {
     test_intfloat();
     test_nonpod();
     test_ctors();
-    test_move();
+    test_move1();
+    test_move2();
     return 0;
 }

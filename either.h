@@ -53,8 +53,8 @@ struct Either {
         : state(r.state)
     {
         switch (state) {
-            case State::L: new (&storage) Left(std::move(r.left()));
-            case State::R: new (&storage) Right(std::move(r.right()));
+            case State::L: new (&storage) Left(std::move(r.left()));   break;
+            case State::R: new (&storage) Right(std::move(r.right())); break;
         }
     }
 
@@ -88,8 +88,10 @@ struct Either {
     }
 
     Either& operator = (Either&& rhs) {
-        this->~Either();
-        new (this) Either(std::move(rhs));
+        if (&rhs != this) {
+            this->~Either();
+            new (this) Either(std::move(rhs));
+        }
         return *this;
     }
 
@@ -145,3 +147,19 @@ private:
 
     typename std::aligned_storage<detail::MaxSize<Left, Right>::result>::type storage;
 };
+
+template <typename L, typename R>
+const L& left(const Either<L, R>& e) {
+    return e.template match<const L&>(
+        [](const L& l) -> const L& { return l; },
+        [](const R& r) -> const L& { printf("Unexpected\n"); abort(); return *(L*)0; });
+}
+
+#if 0
+template <typename L, typename R>
+R& right(Either<L, R>& e) {
+    return e.match(
+        [](const L& l) { printf("Unexpected\n"); abort(); },
+        [](const R& r) { return r; });
+}
+#endif
