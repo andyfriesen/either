@@ -88,10 +88,8 @@ struct Either {
         }
 
         switch (state) {
-            case State::L:
-                return left() == rhs.left();
-            case State::R:
-                return right() == rhs.right();
+            case State::L: return left() == rhs.left();
+            case State::R: return right() == rhs.right();
         }
     }
 
