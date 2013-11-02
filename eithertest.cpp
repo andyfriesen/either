@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <memory>
 #include <iostream>
 #include "either.h"
 
@@ -112,9 +113,24 @@ void test_ctors() {
     });
 }
 
+void test_move() {
+    typedef Either<std::unique_ptr<int>, std::unique_ptr<float> > E;
+
+    E e(std::unique_ptr<int>(new int(22)));
+    E f = std::move(e);
+
+    E g(std::unique_ptr<float>(new float(3.14)));
+    E h = std::move(g);
+
+    h = std::move(f);
+
+    CHECK_EQUAL(e, f);
+}
+
 int main() {
     test_intfloat();
     test_nonpod();
     test_ctors();
+    test_move();
     return 0;
 }

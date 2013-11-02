@@ -24,13 +24,13 @@ template <typename Left, typename Right>
 struct Either {
     Either() = delete;
 
-    explicit Either(const Left& l)
+    Either(const Left& l)
         : state(State::L)
     {
         new (&storage) Left(l);
     }
 
-    explicit Either(const Right& r)
+    Either(const Right& r)
         : state(State::R)
     {
         new (&storage) Right(r);
@@ -49,6 +49,27 @@ struct Either {
         }
     }
 
+    Either(Either&& r)
+        : state(r.state)
+    {
+        switch (state) {
+            case State::L: new (&storage) Left(std::move(r.left()));
+            case State::R: new (&storage) Right(std::move(r.right()));
+        }
+    }
+
+    Either(Left&& l)
+        : state(State::L)
+    {
+        new (&storage) Left(std::move(l));
+    }
+
+    Either(Right&& r)
+        : state(State::R)
+    {
+        new (&storage) Right(std::move(r));
+    }
+
     ~Either() {
         switch (state) {
             case State::L:
@@ -58,6 +79,18 @@ struct Either {
                 right().~Right();
                 break;
         }
+    }
+
+    Either& operator = (const Either& rhs) {
+        this->~Either();
+        new (this) Either(rhs);
+        return *this;
+    }
+
+    Either& operator = (Either&& rhs) {
+        this->~Either();
+        new (this) Either(std::move(rhs));
+        return *this;
     }
 
     template <typename R, typename LF, typename RF>
