@@ -46,6 +46,8 @@ struct Either {
             case State::R:
                 new (&storage)Right(rhs.right());
                 break;
+            default:
+                abort();
         }
     }
 
@@ -53,8 +55,12 @@ struct Either {
         : state(r.state)
     {
         switch (state) {
-            case State::L: new (&storage) Left(std::move(r.left()));   break;
-            case State::R: new (&storage) Right(std::move(r.right())); break;
+            case State::L:
+                new (&storage) Left(std::move(r.left()));
+                break;
+            case State::R:
+                new (&storage) Right(std::move(r.right()));
+                break;
         }
     }
 
@@ -101,8 +107,12 @@ struct Either {
         RF rightFunc
     ) {
         switch (state) {
-            case State::L: return leftFunc(left());
-            case State::R: return rightFunc(right());
+            case State::L:
+                return leftFunc(left());
+            case State::R:
+                return rightFunc(right());
+            default:
+                abort();
         }
     }
 
@@ -112,8 +122,12 @@ struct Either {
         RF rightFunc
     ) const {
         switch (state) {
-            case State::L: return leftFunc(left());
-            case State::R: return rightFunc(right());
+            case State::L:
+                return leftFunc(left());
+            case State::R:
+                return rightFunc(right());
+            default:
+                abort();
         }
     }
 
@@ -123,8 +137,12 @@ struct Either {
         }
 
         switch (state) {
-            case State::L: return left() == rhs.left();
-            case State::R: return right() == rhs.right();
+            case State::L:
+                return left() == rhs.left();
+            case State::R:
+                return right() == rhs.right();
+            default:
+                abort();
         }
     }
 
@@ -133,7 +151,7 @@ struct Either {
     }
 
 private:
-    const Left& left() const   { return *reinterpret_cast<const Left*>(&storage); }
+    const Left& left()   const { return *reinterpret_cast<const Left*>(&storage); }
     const Right& right() const { return *reinterpret_cast<const Right*>(&storage); }
 
     Left& left()   { return *reinterpret_cast<Left*>(&storage); }
@@ -155,11 +173,9 @@ const L& left(const Either<L, R>& e) {
         [](const R& r) -> const L& { printf("Unexpected\n"); abort(); return *(L*)0; });
 }
 
-#if 0
 template <typename L, typename R>
-R& right(Either<L, R>& e) {
-    return e.match(
-        [](const L& l) { printf("Unexpected\n"); abort(); },
-        [](const R& r) { return r; });
+const R& right(Either<L, R>& e) {
+    return e.template match<const R&>(
+        [](const L& l) -> const R& { printf("Unexpected\n"); abort(); return *(R*)0; },
+        [](const R& r) -> const R& { return r; });
 }
-#endif

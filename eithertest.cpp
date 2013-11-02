@@ -16,6 +16,7 @@ void test(bool b, const char* name, const char* doublename, int line) {
 #define CHECK(b)                test(b, __FUNCTION__, #b, __LINE__)
 #define CHECK_EQUAL(a, b)       test((a) == (b), __FUNCTION__, #a " == " #b, __LINE__)
 #define CHECK_NOT_EQUAL(a, b)   test((a) != (b), __FUNCTION__, #a " != " #b, __LINE__)
+#define CHECK_ALMOST_EQUAL(a, b) test(0.01 > abs(b - a), __FUNCTION__, #a " ~= " #b, __LINE__)
 
 void test_intfloat() {
     Either<int, float> ef(5);
@@ -127,6 +128,20 @@ void test_move1() {
     CHECK_EQUAL(22, *fp);
 }
 
+void test_right_function() {
+    typedef Either<std::unique_ptr<int>, std::unique_ptr<float> > E;
+
+    E g(std::unique_ptr<float>(new float(3.14)));
+    E h = std::move(g);
+
+    const auto& hp = right(h);
+    CHECK_EQUAL(nullptr, right(g));
+    CHECK_NOT_EQUAL(nullptr, hp);
+
+    float f = *right(h);
+    CHECK_ALMOST_EQUAL(3.14, f);
+}
+
 void test_move2() {
     typedef Either<std::unique_ptr<int>, std::unique_ptr<float> > E;
 
@@ -154,6 +169,7 @@ int main() {
     test_nonpod();
     test_ctors();
     test_move1();
+    test_right_function();
     test_move2();
     return 0;
 }
