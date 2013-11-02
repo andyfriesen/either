@@ -21,11 +21,11 @@ int main() {
     Either<int, float> es(5.0f);
 
     CHECK(ef.match<bool>(
-        [](const int& i)   { return true; },
-        [](const float& f) { return false; }));
+        [](int i)   { return true; },
+        [](float f) { return false; }));
 
-    auto double_ = [](const Either<int, float>& ef) {
-        return ef.match<float>(
+    auto double_ = [](const Either<int, float>& ef) -> double {
+        return ef.match<double>(
             [](const int& i)   { return i * 2; },
             [](const float& f) { return f * 2; }
         );
@@ -46,6 +46,13 @@ int main() {
     Either<int, float> et(4.0f);
     CHECK(ef != et);
     CHECK_NOT_EQUAL(ef, et);
+
+    bool sensed = false;
+    ef.match<void>(
+        [](int& i) { },
+        [&sensed](const float& f) { sensed = true;});
+
+    CHECK(sensed);
 
     return 0;
 }

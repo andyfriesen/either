@@ -60,53 +60,25 @@ struct Either {
         }
     }
 
-    void match(
-        std::function<void (Left&)> leftFunc,
-        std::function<void (Right&)> rightFunc
+    template <typename R, typename LF, typename RF>
+    R match(
+        LF leftFunc,
+        RF rightFunc
     ) {
         switch (state) {
-            case State::L:
-                return leftFunc(left());
-            case State::R:
-                return rightFunc(right());
+            case State::L: return leftFunc(left());
+            case State::R: return rightFunc(right());
         }
     }
 
-    template <typename R>
+    template <typename R, typename LF, typename RF>
     R match(
-        std::function<R (Left&)> leftFunc,
-        std::function<R (Right&)> rightFunc
-    ) {
-        switch (state) {
-            case State::L:
-                return leftFunc(left());
-            case State::R:
-                return rightFunc(right());
-        }
-    }
-
-    void match(
-        std::function<void (const Left&)> leftFunc,
-        std::function<void (const Right&)> rightFunc
+        LF leftFunc,
+        RF rightFunc
     ) const {
         switch (state) {
-            case State::L:
-                return leftFunc(left());
-            case State::R:
-                return rightFunc(right());
-        }
-    }
-
-    template <typename R>
-    R match(
-        std::function<R (const Left&)> leftFunc,
-        std::function<R (const Right&)> rightFunc
-    ) const {
-        switch (state) {
-            case State::L:
-                return leftFunc(left());
-            case State::R:
-                return rightFunc(right());
+            case State::L: return leftFunc(left());
+            case State::R: return rightFunc(right());
         }
     }
 
