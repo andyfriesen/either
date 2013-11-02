@@ -1,36 +1,51 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <iostream>
 #include "either.h"
 
-void testIt(Either<int, float>& ef) {
-    ef.match(
-        [](int i) { printf("int %i\n", i); },
-        [](float f) { printf("float %f\n", f); }
-    );
+void test(bool b, int line) {
+    if (b) {
+        printf("OK\n");
+    } else {
+        printf("FAIL on line %i\n", line);
+        exit(1);
+    }
 }
 
-float double_(const Either<int, float>& ef) {
-    return ef.match<float>(
-        [](const int& i) { return i * 2; },
-        [](const float& f) { return f * 2; }
-    );
-}
+#define CHECK(b) test(b, __LINE__)
+#define CHECK_EQUAL(a, b) test((a) == (b), __LINE__)
+#define CHECK_NOT_EQUAL(a, b) test((a) != (b), __LINE__)
 
 int main() {
     Either<int, float> ef(5);
     Either<int, float> es(5.0f);
 
-    testIt(ef);
-    testIt(es);
+    CHECK(ef.match<bool>(
+        [](const int& i)   { return true; },
+        [](const float& f) { return false; }));
+
+    auto double_ = [](const Either<int, float>& ef) {
+        return ef.match<float>(
+            [](const int& i)   { return i * 2; },
+            [](const float& f) { return f * 2; }
+        );
+    };
 
     double r = double_(ef);
     double s = double_(es);
 
-    printf("BLAH %f %f\n", r, s);
+    CHECK_EQUAL(r, s);
+
+    CHECK(ef != es);
 
     ef = es;
 
-    testIt(ef);
+    CHECK(ef == es);
+    CHECK_EQUAL(ef, es);
+
+    Either<int, float> et(4.0f);
+    CHECK(ef != et);
+    CHECK_NOT_EQUAL(ef, et);
 
     return 0;
 }

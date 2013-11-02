@@ -110,6 +110,23 @@ struct Either {
         }
     }
 
+    bool operator == (const Either& rhs) const {
+        if (state != rhs.state) {
+            return false;
+        }
+
+        switch (state) {
+            case State::L:
+                return left() == rhs.left();
+            case State::R:
+                return right() == rhs.right();
+        }
+    }
+
+    bool operator != (const Either& rhs) const {
+        return !(*this == rhs);
+    }
+
 private:
     const Left& left() const   { return *reinterpret_cast<const Left*>(&storage); }
     const Right& right() const { return *reinterpret_cast<const Right*>(&storage); }
