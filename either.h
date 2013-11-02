@@ -109,7 +109,6 @@ private:
     };
 
     State state;
-    typedef typename std::aligned_storage<detail::MaxSize<Left, Right>::result>::type StorageType;
 
-    StorageType storage;
+    typename std::aligned_storage<detail::MaxSize<Left, Right>::result>::type storage;
 };

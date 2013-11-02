@@ -85,6 +85,7 @@ struct County {
 int County::destructy = 0;
 
 void test_ctors() {
+    County::destructy = 0;
     int copycount;
     {
         Either<County, std::string> a("Hody2");
@@ -95,7 +96,7 @@ void test_ctors() {
     }
 
     CHECK_EQUAL(2, copycount);
-    CHECK_EQUAL(1, County::destructy);
+    CHECK_EQUAL(2, County::destructy);
 
     Either<County, std::string> a("BLEEEEEH");
     Either<County, std::string> b("HUUUUUU");
@@ -103,7 +104,7 @@ void test_ctors() {
     std::string result = a.match<std::string>(
         [](County) { return "wat"; },
         [&](const std::string& s1) {
-            b.match<std::string>(
+            return b.match<std::string>(
                 [](County c) { return "wat"; },
                 [&](const std::string& s2) {
                     return s1 + "|" + s2;
