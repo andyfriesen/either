@@ -36,6 +36,19 @@ struct Either {
         new (&storage) Right(r);
     }
 
+    Either(const Either& rhs)
+        : state(rhs.state)
+    {
+        switch (state) {
+            case State::L:
+                new (&storage)Left(rhs.left());
+                break;
+            case State::R:
+                new (&storage)Right(rhs.right());
+                break;
+        }
+    }
+
     ~Either() {
         switch (state) {
             case State::L:

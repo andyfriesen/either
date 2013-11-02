@@ -28,6 +28,9 @@ int main() {
 
     printf("BLAH %f %f\n", r, s);
 
-    printf("SNTH\n");
+    ef = es;
+
+    testIt(ef);
+
     return 0;
 }
