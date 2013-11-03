@@ -34,7 +34,7 @@ e.match<void>(
 FIXME: `match` currently requires that you provide the return type as an explicit template argument.
 
 ```c++
-Either<float, double> pi(3.141f);
+Either<float, double> pi(3.141); // implicit conversion makes this so exciting!
 double roundedUp = pi.match<double>(
     [](float f)  { return f; },
     [](double d) { return d; });
