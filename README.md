@@ -40,16 +40,6 @@ double roundedUp = pi.match<double>(
     [](double d) { return d; });
 ```
 
-It's reasonable and ok to grab a reference or a const reference out of an `Either` with `match`:
-
-```c++
-Either<int, float> e;
-auto& i = e.match(
-    [](int& i) { return i; },
-    [](float&) { static int dummy; return dummy; });
-i++;
-```
-
 A few utility functions are provided for basic things: `isLeft`, `isRight`, `left`, and `right`.  `left()` calls `abort()` if it is called on an `Either` that has a `right` value, and vice versa.
 
 ```c++
@@ -57,4 +47,11 @@ bool isLeft(const Either&)
 bool isRight(const Either&)
 LeftType& left(Either&)
 RightType& right(Either&)
+```
+
+It's reasonable and ok to grab a reference or a const reference out of an `Either`:
+
+```c++
+Either<int, float> e = ...;
+left(e)++;
 ```
