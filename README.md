@@ -55,6 +55,6 @@ A few utility functions are provided for basic things: `isLeft`, `isRight`, `lef
 ```c++
 bool isLeft(const Either&)
 bool isRight(const Either&)
-LeftType left(Either&)
-RightType right(Either&)
+LeftType& left(Either&)
+RightType& right(Either&)
 ```
