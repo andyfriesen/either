@@ -5,7 +5,7 @@ Haskell (and other functional languages) have a delightful feature called discri
 
 One of the most basic things you can get out of this is a type called `Either`.
 
-`Either<L, R>` contains exactly one of either type `L` or type `R`.
+`Either<Left, Right>` contains exactly one of either type `Left` or type `Right`.
 
 This is handy for functions that can fail.  eg
 
