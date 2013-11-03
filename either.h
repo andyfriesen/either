@@ -88,8 +88,10 @@ struct Either {
     }
 
     Either& operator = (const Either& rhs) {
-        this->~Either();
-        new (this) Either(rhs);
+        if (&rhs != this) {
+            this->~Either();
+            new (this) Either(rhs);
+        }
         return *this;
     }
 

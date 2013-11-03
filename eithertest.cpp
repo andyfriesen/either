@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <memory>
 #include <iostream>
 #include "either.h"
 
 void test(bool b, const char* name, const char* doublename, int line) {
     if (b) {
-        printf("OK: %s\n", doublename);
+        const std::string dots(40 - strlen(name), '.');
+        printf("OK: %s.%s.\t%s\n", name, dots.c_str(), doublename);
     } else {
         printf("FAIL in %s %s line %i\n", name, doublename, line);
         exit(1);
@@ -156,18 +158,28 @@ void test_move2() {
 
     h = std::move(h);
 
-    int value = h.match<int>(
-        [](const std::unique_ptr<int>& i) { return *i; },
-        [](const std::unique_ptr<float>& f) { return 0xdeadbeef; });
+    CHECK_EQUAL(22, *left(h));
+}
 
-    CHECK_EQUAL(value, 22);
+void test_self_assignment() {
+    typedef Either<std::shared_ptr<int>, float> E;
+
+    E e(std::shared_ptr<int>(new int(999)));
+
+    e = e;
+
+    CHECK_NOT_EQUAL(nullptr, left(e));
+    CHECK_EQUAL(999, *left(e));
 }
 
 void test_nonconst_function_accessors() {
     Either<int, float> e(5);
     left(e)++;
-
     CHECK_EQUAL(6, left(e));
+
+    Either<int, float> f(2.1211f);
+    right(f)++;
+    CHECK_ALMOST_EQUAL(3.1211, right(f));
 }
 
 int main() {
@@ -177,5 +189,7 @@ int main() {
     test_move1();
     test_right_function();
     test_move2();
+    test_self_assignment();
+    test_nonconst_function_accessors();
     return 0;
 }
