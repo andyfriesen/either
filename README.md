@@ -23,7 +23,13 @@ Either<int, const char*> e(5);
 Either<int, const char*> f("Hello!");
 ```
 
-The best, safest way to pull stuff out of an `Either` is with its `match` method:
+Non-POD types are ok.
+
+```c++
+Either<ErrorCode, std::string> result = extractJsonKey(jsonDocument, keyName);
+```
+
+The best, safest way to pull stuff out of an `Either` is with its `match` method.  This ensures, by construction, that you do not treat a `left` as a `right` or vice versa:
 
 ```c++
 e.match<void>(
