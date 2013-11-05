@@ -23,6 +23,23 @@ Either<int, const char*> e(5);
 Either<int, const char*> f("Hello!");
 ```
 
+If both the types of the Either are mutually convertable, you will need to use the `Either::left` and `Either::right` functions to construct instances.
+
+```c++
+auto a = Either<int, int>::left(5);
+auto b = Either<int, int>::right(5);
+```
+
+If both types support equality, Either does too.  Two Eithers are equal if their contents are equal.  If both types are the same, then the discriminator must also match:
+
+```c++
+auto a = Either<int, int>::left(5);
+auto b = Either<int, int>::right(5);
+auto c = Either<int, int>::left(5);
+a == b; // false
+a == c; // true
+```
+
 Non-POD types are ok.
 
 ```c++
