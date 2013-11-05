@@ -24,16 +24,32 @@ template <typename Left, typename Right>
 struct Either {
     Either() = delete;
 
+public:
+
     Either(const Left& l)
         : state(State::L)
     {
         new (&storage) Left(l);
     }
 
-    Either(const Right& r)
+    template <typename R>
+    Either(const R& r, typename std::enable_if<std::is_convertible<R, Right>::value && !std::is_same<Left, Right>::value>::type* = 0)
         : state(State::R)
     {
         new (&storage) Right(r);
+    }
+
+    Either(Left&& l)
+        : state(State::L)
+    {
+        new (&storage) Left(std::move(l));
+    }
+
+    template <typename R>
+    Either(R&& r, typename std::enable_if<std::is_convertible<R, Right>::value && !std::is_same<Left, Right>::value>::type* = 0)
+        : state(State::R)
+    {
+        new (&storage) Right(std::move(r));
     }
 
     Either(const Either& rhs)
@@ -64,18 +80,6 @@ struct Either {
         }
     }
 
-    Either(Left&& l)
-        : state(State::L)
-    {
-        new (&storage) Left(std::move(l));
-    }
-
-    Either(Right&& r)
-        : state(State::R)
-    {
-        new (&storage) Right(std::move(r));
-    }
-
     ~Either() {
         switch (state) {
             case State::L:
@@ -85,6 +89,18 @@ struct Either {
                 right().~Right();
                 break;
         }
+    }
+
+    static Either left(const Left& l) {
+        Either result(State::L);
+        new (&result.storage) Left(l);
+        return result;
+    }
+
+    static Either right(const Right& r) {
+        Either result(State::R);
+        new (&result.storage) Right(r);
+        return result;
     }
 
     Either& operator = (const Either& rhs) {
@@ -169,7 +185,18 @@ private:
 
     State state;
 
+    explicit Either(State s)
+        : state(s)
+    { }
+
     typename std::aligned_storage<detail::MaxSize<Left, Right>::result>::type storage;
+
+    template <typename L, typename R> friend L& unsafeLeft(Either<L, R>& e);
+    template <typename L, typename R> friend const L& unsafeLeft(const Either<L, R>& e);
+    template <typename L, typename R> friend L&& unsafeLeft(Either<L, R>&& e);
+    template <typename L, typename R> friend R& unsafeRight(Either<L, R>& e);
+    template <typename L, typename R> friend const L& unsafeRight(const Either<L, R>& e);
+    template <typename L, typename R> friend L&& unsafeRight(Either<L, R>&& e);
 };
 
 template <typename L, typename R>
@@ -209,4 +236,30 @@ const R& right(const Either<L, R>& e) {
     return e.template match<const R&>(
         [](const L& l) -> const R& { printf("Unexpected\n"); abort(); return *(R*)0; },
         [](const R& r) -> const R& { return r; });
+}
+
+template <typename L, typename R>
+L& unsafeLeft(Either<L, R>& e) {
+    return e.left();
+}
+template <typename L, typename R>
+const L& unsafeLeft(const Either<L, R>& e) {
+    return e.left();
+}
+template <typename L, typename R>
+L&& unsafeLeft(Either<L, R>&& e) {
+    return std::move(e.left());
+}
+
+template <typename L, typename R>
+R& unsafeRight(Either<L, R>& e) {
+    return e.right();
+}
+template <typename L, typename R>
+const L& unsafeRight(const Either<L, R>& e) {
+    return e.right();
+}
+template <typename L, typename R>
+L&& unsafeRight(Either<L, R>&& e) {
+    return std::move(e.right());
 }

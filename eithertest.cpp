@@ -21,8 +21,8 @@ void test(bool b, const char* name, const char* doublename, int line) {
 #define CHECK_ALMOST_EQUAL(a, b) test(0.01 > abs(b - a), __FUNCTION__, #a " ~= " #b, __LINE__)
 
 void test_intfloat() {
-    Either<int, float> ef(5);
-    Either<int, float> es(5.0f);
+    auto ef = Either<int, float>::left(5);
+    auto es = Either<int, float>::right(5.0f);
 
     CHECK(isLeft(ef));
     CHECK(isRight(es));
@@ -61,7 +61,7 @@ void test_intfloat() {
 void test_nonpod() {
     Either<std::string, float> hootie("Hootie");
     Either<std::string, float> booper("booper");
-    Either<std::string, float> sooper(3.14);
+    Either<std::string, float> sooper(3.14f);
 
     CHECK_EQUAL(hootie, hootie);
     CHECK_NOT_EQUAL(hootie, booper);
@@ -173,13 +173,22 @@ void test_self_assignment() {
 }
 
 void test_nonconst_function_accessors() {
-    Either<int, float> e(5);
+    auto e = Either<int, float>::left(5);
     left(e)++;
     CHECK_EQUAL(6, left(e));
 
-    Either<int, float> f(2.1211f);
+    auto f = Either<int, float>::right(2.1211f);
     right(f)++;
     CHECK_ALMOST_EQUAL(3.1211, right(f));
+}
+
+void test_either_with_same_types() {
+    auto a = Either<int, int>::left(5);
+    auto b = Either<int, int>::right(5);
+
+    CHECK_NOT_EQUAL(a, b);
+
+    CHECK_EQUAL(unsafeLeft(a), unsafeRight(b));
 }
 
 int main() {
@@ -191,5 +200,6 @@ int main() {
     test_move2();
     test_self_assignment();
     test_nonconst_function_accessors();
+    test_either_with_same_types();
     return 0;
 }

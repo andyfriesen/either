@@ -33,8 +33,8 @@ The best, safest way to pull stuff out of an `Either` is with its `match` method
 
 ```c++
 e.match<void>(
-    [](int i) { printf("int %i\n", i); }
-    [](const char* s) { printf("string '%s'\n", s); }
+    [](int i)         { printf("int %i\n", i); },
+    [](const char* s) { printf("string '%s'\n", s); });
 ```
 
 FIXME: `match` currently requires that you provide the return type as an explicit template argument.
@@ -46,13 +46,40 @@ double roundedUp = pi.match<double>(
     [](double d) { return d; });
 ```
 
-A few utility functions are provided for basic things: `isLeft`, `isRight`, `left`, and `right`.  `left()` calls `abort()` if it is called on an `Either` that has a `right` value, and vice versa.
+A few utility functions are provided for basic things: 
 
 ```c++
 bool isLeft(const Either&)
 bool isRight(const Either&)
+
 LeftType& left(Either&)
 RightType& right(Either&)
+const LeftType& left(const Either&)
+const RightType& right(const Either&)
+LeftType&& left(Either&)
+RightType&& right(Either&)
+
+LeftType& unsafeLeft(Either&)
+RightType& unsafeRight(Either&)
+const LeftType& unsafeLeft(const Either&)
+const RightType& unsafeRight(const Either&)
+LeftType&& unsafeLeft(Either&&)
+RightType&& unsafeRight(Either&&)
+```
+
+`left()` calls `abort()` if it is called on an `Either` that
+has a `right` value, and vice versa.
+
+`unsafeLeft` and `unsafeRight` do not do any kind of verification.  Only use them if you are sure.
+
+```c++
+Either<int, string> e = ...;
+
+if (isLeft(e)) {
+    printf("%i\n", unsafeLeft(e));
+} else {
+    printf("%s\n", unsafeRight(e).c_str());
+}
 ```
 
 It's reasonable and ok to grab a reference or a const reference out of an `Either`:
@@ -60,4 +87,11 @@ It's reasonable and ok to grab a reference or a const reference out of an `Eithe
 ```c++
 Either<int, float> e = ...;
 left(e)++;
+```
+
+Move semantics are supported:
+
+```c++
+Either<std::unique_ptr<Error>, std::unique_ptr<Result> > e = ...;
+auto f = std::move(e);
 ```
