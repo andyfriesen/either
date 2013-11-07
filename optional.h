@@ -21,7 +21,7 @@ struct Optional {
         new (&storage) T(std::move(l));
     }
 
-    Optional(const Optional& rhs)
+    explicit Optional(const Optional& rhs)
         : hasvalue(rhs.hasvalue)
     {
         if (rhs.hasvalue) {
